@@ -51,17 +51,9 @@ labels = ['Soil cover', 'Vegetation cover', 'Impervious cover', 'Minimum tempera
     'Maximum temperature', 'Tree cover', 'Population density']
 units = ['%', '%', '%', 'C', 'C', 'C', '%', 'people per ha']
 group_labels = ['Background', 'Aedes aegypti', 'Aedes albopictus']
+bg_labels = ['all', 'Caribbean', 'Central America', 'South America']
+bg_arr = [bg_all, bg_car, bg_cam, bg_sam]
 
-# set group labels to show the number of points
-group_labels_all = []
-group_labels_car = []
-group_labels_cam = []
-group_labels_sam = []
-for i in range(len(group_labels)): 
-    group_lables_all.append
-    group_labels_car = []
-    group_labels_cam = []
-    group_labels_sam = []
 
 #cb = aei.color.color_blind()
 #cols = [cb[1], cb[3], cb[6]]
@@ -82,7 +74,7 @@ for i in range(len(fields)):
         plot=plt, fill=True, label=group_labels_all, xlabel=xlabel, title=title, cutoff=2)
         
     # save the figure
-    plt.savefig("{}global-1km-{}.png".format(plts, fields[i]), dpi=200)
+    plt.savefig("{}{}global-1km-{}.png".format(plts, 'by-extent/', fields[i]), dpi=200)
     plt.close()
     
 
@@ -102,7 +94,7 @@ for i in range(len(fields)):
         plot=plt, fill=True, label=group_labels_car, xlabel=xlabel, title=title, cutoff=2)
         
     # save the figure
-    plt.savefig("{}caribbean-1km-{}.png".format(plts, fields[i]), dpi=200)
+    plt.savefig("{}{}caribbean-1km-{}.png".format(plts, 'by-extent/', fields[i]), dpi=200)
     plt.close()
     
     
@@ -123,7 +115,7 @@ for i in range(len(fields)):
         plot=plt, fill=True, label=group_labels_cam, xlabel=xlabel, title=title, cutoff=2)
         
     # save the figure
-    plt.savefig("{}central-america-1km-{}.png".format(plts, fields[i]), dpi=200)
+    plt.savefig("{}{}central-america-1km-{}.png".format(plts, 'by-extent/', fields[i]), dpi=200)
     plt.close()
     
     
@@ -143,11 +135,32 @@ for i in range(len(fields)):
         plot=plt, fill=True, label=group_labels_sam, xlabel=xlabel, title=title, cutoff=2)
         
     # save the figure
-    plt.savefig("{}south-america-1km-{}.png".format(plts, fields[i]), dpi=200)
+    plt.savefig("{}{}south-america-1km-{}.png".format(plts, 'by-extent/', fields[i]), dpi=200)
     plt.close()
     
 
-# ok, now we're going to plot out 
+# ok, now we're going to plot out how the background data varies
+for i in range(len(fields)):
+    # set up general data per plot
+    xlabel = "{} ({})".format(labels[i], units[i])
+    
+    # then loop through all the different background types
+    for j in range(len(bg_arr)):
+        group_labels_bg = []
+        group_labels_bg.append("{} - {}".format(group_labels[0], bg_labels[j]))
+        group_labels_bg.append("{} - {}".format(group_labels[1], bg_labels[0]))
+        group_labels_bg.append("{} - {}".format(group_labels[2], bg_labels[0]))
+        
+        title = "{} distributions\nExtent - {}\nGrain size - 1 km".format(labels[i], bg_labels[j])
+        
+        # set up the full plots
+        plt.figure(figsize=(5, 5), dpi=150)
+        plt = aei.plot.density_dist([bg_arr[j][fields[i]], ae_all[fields[i]], aa_all[fields[i]]],
+            plot=plt, fill=True, label=group_labels_bg, xlabel=xlabel, title=title, cutoff=2)
+            
+        # save the figure
+        plt.savefig("{}{}{}-1km-{}.png".format(plts, 'background-variation/', fields[i], bg_labels[j]), dpi=200)
+        plt.close()
     
     
     
