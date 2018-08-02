@@ -1,10 +1,6 @@
 import os
 import ccb
 import glob
-#import numpy as np
-#import pandas as pd
-#import matplotlib.pyplot as plt
-#%matplotlib tk
 
 # set the base files to use
 base = '/home/salo/src/mosquito-mapping/'
