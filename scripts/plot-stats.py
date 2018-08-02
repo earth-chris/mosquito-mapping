@@ -54,6 +54,10 @@ group_labels = ['Background', 'Aedes aegypti', 'Aedes albopictus']
 bg_labels = ['all', 'Caribbean', 'Central America', 'South America']
 bg_arr = [bg_all, bg_car, bg_cam, bg_sam]
 
+# set plot locations for each plot label
+legend_loc = ['upper right', 'upper left', 'upper right', 'upper left', 'lower left', 'lower left',
+    'upper right', 'upper right']
+
 
 #cb = aei.color.color_blind()
 #cols = [cb[1], cb[3], cb[6]]
@@ -153,10 +157,22 @@ for i in range(len(fields)):
         
         title = "{} distributions\nExtent - {}\nGrain size - 1 km".format(labels[i], bg_labels[j])
         
+        if j==0:
+            xlim = None
+        
         # set up the full plots
         plt.figure(figsize=(5, 5), dpi=150)
         plt = aei.plot.density_dist([bg_arr[j][fields[i]], ae_all[fields[i]], aa_all[fields[i]]],
-            plot=plt, fill=True, label=group_labels_bg, xlabel=xlabel, title=title, cutoff=2)
+            xlim=xlim, plot=plt, fill=True, label=group_labels_bg, xlabel=xlabel, title=title, cutoff=2)
+        
+        # set the legend location
+        plt.legend(loc=legend_loc[i])
+            
+        # store the xlim data to use in other plots to keep axes consistent
+        if j == 0:
+            xlim = plt.xlim()
+        else:
+            plt.xlim(xlim)
             
         # save the figure
         plt.savefig("{}{}{}-1km-{}.png".format(plts, 'background-variation/', fields[i], bg_labels[j]), dpi=200)
