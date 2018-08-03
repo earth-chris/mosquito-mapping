@@ -30,9 +30,13 @@ test_pct = 25
 nodata = 255
 
 # create an array to store auc values
-auc_ae_mn = np.array((len(env), len(geo), len(res)))
-auc_aa_mn = np.array((len(env), len(geo), len(res)))
+auc_ae_mn = np.zeros((len(env), len(geo), len(res)))
+auc_aa_mn = np.zeros((len(env), len(geo), len(res)))
 auc_mn_lst = [auc_ae_mn, auc_aa_mn]
+
+fsc_ae_mn = np.zeros((len(env), len(geo), len(res)))
+fsc_aa_mn = np.zeros((len(env), len(geo), len(res)))
+fsc_mn_lst = [fsc_ae_mn, fsc_aa_mn]
 
 # report starting!
 ccb.prnt.status('starting maxent runs!')
@@ -101,10 +105,34 @@ for s in range(len(sp)):
                     ytrue, ypred = mx.get_predictions(spl[s], test=True)
                     
                     # get the number of test data
-                    n_test = len(ytrue[ytrue == 1])
+                    test_ind = ytrue == 1
+                    n_test = test_ind.sum()
+                    test_true = ytrue[test_ind]
+                    test_pred = ypred[test_ind]
                     
                     # get the indices of the background points to subset
                     ind_bck = ytrue == 0
-                    n_ind_bck = ind_bck.sum()
+                    n_bck = ind_bck.sum()
+                    back_true = ytrue[ind_bck]
+                    back_pred = ypred[ind_bck]
                     
-                    # get random indices
+                    # loop through some number of times, randomly sample the background,
+                    #  and calculate auc scores
+                    n_rndm = 10
+                    auc = np.zeros(n_rndm)
+                    fsc = np.zeros(n_rndm)
+                    for i in range(n_rndm):
+                        # get random indices
+                        rndm = np.random.randint(0, n_bck, n_test)
+                        
+                        # stick the test/background data together
+                        auc_true = np.append(test_true, back_true[rndm])
+                        auc_pred = np.append(test_pred, back_pred[rndm])
+                        auc[i] = ccb.metrics.roc_auc(auc_true, auc_pred)
+                        fsc[i] = ccb.metrics.f1_score(auc_true, auc_pred)
+                    
+                    # then add this value to the array
+                    auc_mn_lst[s][e,g,r] = auc.mean()
+                    fsc_mn_lst[s][e,g,r] = fsc.mean()
+                except:
+                    pass
