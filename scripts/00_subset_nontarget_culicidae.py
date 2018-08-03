@@ -6,8 +6,8 @@ import geopandas as gpd
 base = '/home/cba/src/mosquito-mapping/'
 infile = base + 'vector/culicidae-all.shp'
 out_vec = base + 'vector/culicidae-nontarget.shp'
-out_csv = base + 'vector/culicidae-nontarget.csv'
-out_epsg = 3410
+out_csv = base + 'maxent-inputs/culicidae-nontarget.csv'
+out_epsg = 4326
 out_field = 'family'
 
 # set the vectors to exclude from the output bias file
@@ -30,5 +30,7 @@ output_vector = input_vector[ind]
 output_vector.to_file(out_vec)
 
 # and convert the vector file to maxent format
-cmd_str = 'vector-to-maxent -i {i} -o {o} -e {e} -f {f}'.format(i=out_vec, o=out_csv, e=out_epsg, f=out_field)
-ccb.run(cmd_str)
+cmd = 'vector-to-maxent -i {i} -o {o} -e {e} -f {f}'.format(i=out_vec, o=out_csv, e=out_epsg, f=out_field)
+ccb.prnt.status('converting vector to maxent csv file')
+ccb.prnt.status(cmd)
+ccb.run(cmd)

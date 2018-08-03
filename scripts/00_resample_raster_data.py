@@ -9,13 +9,17 @@ outd = base
 
 # set the input files
 i_ccblc = raws + 'ccblc-raw-mosaic-masked.tif'
-i_temps = raws + 'temps-raw-msoaic-masked.tif'
-i_popdn = raws + 'popdn-raw-mosaic-masked.tif'
+i_temps = raws + 'temps-raw-mosaic-masked.tif'
+i_popdn = raws + 'popdn-raw-mosaic-masked-ln.tif'
 i_trees = raws + 'trees-raw-mosaic-masked.tif'
 i_files = [i_ccblc, i_temps, i_popdn, i_trees]
 
 # set the target resolutions
-res = [500, 1000, 5000, 10000, 50000, 100000]
+res = np.array([500, 1000, 5000, 10000, 50000, 100000])
+res_scalar = 1 / 110000
+res_scaled = res * res_scalar
+
+resample = 'average'
 
 # make directories for each res
 for r in res:
@@ -29,7 +33,8 @@ for file in i_files:
     obase = os.path.splitext(file)[0]
     for r in res:
         opath = '{dir}{r:6d}-m/{obase}.tif'
-        cmd = 'gdalwarp -tr {res} {res} -co COMPRESS=LZW {inf} {outf]'.format(res=r, inf=file, outf=opath)
+        cmd = 'gdalwarp -tr {res} {res} -r {resample} -co COMPRESS=LZW {inf} {outf]'.format(
+            res=r, resample=resample, inf=file, outf=opath)
         ccb.prnt.status(cmd)
         ccb.run(cmd)
         
