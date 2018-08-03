@@ -11,6 +11,7 @@ output_format = 'logistic'
 
 # set the output resolutions
 res = [1000, 5000, 10000, 50000, 100000]
+res = [100000]
 
 # create the maxent object
 for i in range(len(res)):

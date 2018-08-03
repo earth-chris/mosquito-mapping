@@ -18,11 +18,11 @@ field='Name'
 
 # convert the full data sets to maxent files
 # aegypti
-outf = '{dir}{sp}-all.csv'.format(dir=outdir, sp=aegypti)
+outf = '{dir}{sp}-all-training.csv'.format(dir=outdir, sp=aegypti)
 cmd = 'vector-to-maxent -i {i} -o {o} -f {f}'.format(i=aef, o=outf, f=field)
 #ccb.run(cmd)
 # and albo
-outf = '{dir}{sp}-all.csv'.format(dir=outdir, sp=albopictus)
+outf = '{dir}{sp}-all-training.csv'.format(dir=outdir, sp=albopictus)
 cmd = 'vector-to-maxent -i {i} -o {o} -f {f}'.format(i=aaf, o=outf, f=field)
 #ccb.run(cmd)
 

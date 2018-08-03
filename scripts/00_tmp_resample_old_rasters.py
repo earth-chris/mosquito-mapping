@@ -25,7 +25,7 @@ for j in range(len(layers)):
     cmd = 'gdal_translate -of AAIGrid -b {band} {inf} {outf}'.format(
         band=j+1, inf=inf, outf=lpath)
     ccb.prnt.status(cmd)
-    ccb.run(cmd)
+    #ccb.run(cmd)
 
 # loop through each of the target files and resample them
 ccb.prnt.status('resampling raster data')
@@ -36,7 +36,7 @@ for i in range(len(res)):
     cmd = 'gdalwarp -multi -tr {res} {res} -r {resample} -co COMPRESS=LZW {inf} {outf}'.format(
         res=res_scaled[i], resample=resample, inf=inf, outf=opath)
     ccb.prnt.status(cmd)
-    ccb.run(cmd)
+    #ccb.run(cmd)
     
     # then run the band-by-band extraction
     for j in range(len(layers)):
@@ -44,7 +44,8 @@ for i in range(len(res)):
         cmd = 'gdal_translate -of AAIGrid -b {band} {inf} {outf}'.format(
             band=j+1, inf=opath, outf=lpath)
         ccb.prnt.status(cmd)
-        ccb.run(cmd)
+        if j == 2:
+            ccb.run(cmd)
         
 # convene a shindig
 ccb.prnt.status('done resampling raster data!')
