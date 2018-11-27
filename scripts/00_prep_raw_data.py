@@ -135,9 +135,51 @@ ccb.run('gdaladdo -ro -r average {} 2 4 8 16 32 64 128 256'.format(stack))
 # reproject and rescale the data to the different output scales
 output_stacks = []
 for res in scales:
-    outf = '{}/{:06d}-m/stacked-layers.tif'.format(base, res)
+    outf = '{}{:06d}-m/stacked-layers.tif'.format(base, res)
     output_stacks.append(outf)
-    cmd = 'gdalwarp -co COMPRESS-LZW -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
+    cmd = 'gdalwarp -multi -co COMPRESS-LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
         srs=proj, res=res, inf=stack, outf=outf)
     print(cmd)
+    ccb.run(cmd)
     
+
+#####
+# now convert each layer to ascii grid for maxent
+bnames = [
+    'LAI-kurtosis',
+    'LAI-mean',
+    'LAI-skew',
+    'LAI-variance',
+    'CLD-kurtosis',
+    'CLD-mean',
+    'CLD-skew',
+    'CLD-variance',
+    'LST-kurtosis',
+    'LST-mean',
+    'LST-skew',
+    'LST-variance',
+    'Population'
+]
+
+for i in range(len(scales)):
+    for j in range(len(bnames)):
+        outf = '{}{:06d}-m/{}.asc'.format(base, res[i], bnames[j])
+        cmd = 'gdal_translate -of {of} -b {b} {inf} {outf}'.format(
+            of=of, b=j+1, inf=output_stacks[i], outf=outf)
+        print(cmd)
+        
+
+#####
+# then, dumbly, do the log transform on the population data separately
+for i in range(len(scales)):
+    outf = '{}{:06d}-m/Population-ln.tif'.format(base, res[i])
+    cmd = 'otbcli_BandMath -il {inf} -out "{outf}?&gdal:co:COMPRESS=LZW" -exp "exp(im1b13)"'.format(
+        inf=output_stacks[i], outf=outf)
+    print(cmd)
+    ccb.run(cmd)
+    
+    outf_ln = '{}{:06d}-m/Population-ln.asc'.format(base, res[i])
+    cmd = 'gdal_translate -of {of} {inf} {outf}'.format(
+        of=of, inf=outf, outf=outf_ln)
+    print(cmd)
+    ccb.run(cmd)
