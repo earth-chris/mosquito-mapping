@@ -12,11 +12,13 @@ aa = ccb.read.pck(aa_pck)
 ae = ccb.read.pck(ae_pck)
 
 # set the colors 
-c_env = ["#56B4E9", "#009E73", "#CC79A7"]
-c_ext = ["#CC79A7", "#E69F00", "#56B4E9", "#009E73"]
+#c_env = ["#56B4E9", "#009E73", "#CC79A7"]
+c_ext = ["#009E73", "#56B4E9", "#E69F00", "#CC79A7"]
+c_env = c_ext
 
 # set the labels for each 
-l_env = ['climate', 'land cover', 'all']
+#l_env = ['climate', 'land cover', 'all']
+l_env = ['lai', 'cloud cover', 'temperature', 'all']
 l_ext = ['Full extent', 'Central America', 'Caribbean', 'South America']
 l_scl = ['1 km', '5 km', '10 km', '50 km', '100 km']
 n_scl = [1000, 5000, 10000, 50000, 100000]
@@ -30,7 +32,8 @@ space = 0.0
 ind1 = np.arange(nbins)
 ind2 = np.arange(nbins) + (width + space)
 ind3 = np.arange(nbins) + 2 * (width + space)
-inds = [ind1, ind2, ind3]
+ind4 = np.arange(nbins) + 3 * (width + space)
+inds = [ind1, ind2, ind3, ind4]
 
 # plot aegypti first
 for i in range(len(l_env)):

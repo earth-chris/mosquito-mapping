@@ -1,13 +1,15 @@
 import ccb
 import numpy as np
+import pickle
 
 
 # set the paths to the input files
-base = '/home/cba/src/mosquito-mapping/'
+base = '/home/salo/src/mosquito-mapping/'
 samples_dir = base + 'maxent-inputs/'
 layers = base + 'raster/'
 bias = base + 'maxent-outputs/'
 outdir = base + 'maxent-outputs/'
+output_format = 'cumulative'
 
 # set the species to assess
 spl = ['Aedes aegypti', 'Aedes albopictus']
@@ -20,14 +22,39 @@ res = [1000, 5000, 10000, 50000, 100000]
 geo = ['all', 'cam', 'car', 'sam']
 
 # set the environmental subsets
-env = ['clim', 'lcov', 'envs']
-climlist = ['temp-max', 'temp-med', 'temp-min']
-lcovlist = ['vegetation', 'trees', 'impervious', 'soil']
-envslist = climlist + lcovlist
+#env = ['clim', 'lcov', 'envs']
+#climlist = ['temp-max', 'temp-med', 'temp-min']
+#lcovlist = ['vegetation', 'trees', 'impervious', 'soil']
+#envslist = climlist + lcovlist
+
+env = ['lai', 'cld', 'lst', 'envs']
+
+lailist = [
+    'LAI-kurtosis',
+    'LAI-mean',
+    'LAI-skew',
+    'LAI-variance'
+]    
+
+cldlist = [
+    'CLD-kurtosis',
+    'CLD-mean',
+    'CLD-skew',
+    'CLD-variance'
+]
+
+lstlist = [
+    'LST-kurtosis',
+    'LST-mean',
+    'LST-skew',
+    'LST-variance'
+]
+
+envslist = lailist + cldlist + lstlist
 
 # set the maxent run options
 test_pct = 25
-nodata = 255
+nodata = -9999
 
 # create an array to store auc values
 auc_ae_mn = np.zeros((len(env), len(geo), len(res)))
@@ -63,10 +90,19 @@ for s in range(len(sp)):
                     layers=layers, res=res[r])
                     
                 # and the layers to use
-                if env[e] == 'clim':
-                    layer_list = climlist
-                elif env[e] == 'lcov':
-                    layer_list = lcovlist
+                #if env[e] == 'clim':
+                #    layer_list = climlist
+                #elif env[e] == 'lcov':
+                #    layer_list = lcovlist
+                #else:
+                #    layer_list = envslist
+                    
+                if env[e] == 'lai':
+                    layer_list = lailist
+                elif env[e] == 'cld':
+                    layer_list = cldlist
+                elif env[e] == 'lst':
+                    layer_list = lstlist
                 else:
                     layer_list = envslist
                     
@@ -82,7 +118,8 @@ for s in range(len(sp)):
                     
                 # set the parameters in the maxent object
                 mx.set_parameters(model_dir=model_dir, samples=samples, env_layers=env_layers,
-                    bias_file=bias_file, write_grids=write_grids, nodata=nodata)
+                    bias_file=bias_file, write_grids=write_grids, nodata=nodata,
+                    output_format=output_format)
                     
                 # set the layers
                 mx.set_layers(layer_list)
@@ -96,8 +133,8 @@ for s in range(len(sp)):
                     mx.set_parameters(test_samples=test_samples)
                     
                 # print out the command to run
-                #ccb.prnt.status(mx.build_cmd())
-                #mx.fit()
+                ccb.prnt.status(mx.build_cmd())
+                mx.fit()
                 
                 # pull the output auc values
                 try:
@@ -136,3 +173,15 @@ for s in range(len(sp)):
                     fsc_mn_lst[s][e,g,r] = fsc.mean()
                 except:
                     pass
+                
+# export the results to a picle file
+pck_ae = base + 'scripts/ae-auc.pck'
+pck_aa = base + 'scripts/aa-auc.pck'
+
+with open(pck_ae, 'wb') as f:
+    pickle.dump(auc_ae_mn, f)
+    
+with open(pck_aa, 'wb') as f:
+    pickle.dump(auc_aa_mn, f)
+    
+    

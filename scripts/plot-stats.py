@@ -9,50 +9,60 @@ base = '/home/salo/src/mosquito-mapping/'
 tbls = base + 'tables/'
 plts = base + 'plots/'
 ae_all_f = tbls + 'aedes-aegypti-all.csv'
-ae_car_f = tbls + 'aedes-aegypti-caribbean.csv'
-ae_cam_f = tbls + 'aedes-aegypti-central-america.csv'
-ae_sam_f = tbls + 'aedes-aegypti-south-america.csv'
+#ae_car_f = tbls + 'aedes-aegypti-caribbean.csv'
+#ae_cam_f = tbls + 'aedes-aegypti-central-america.csv'
+#ae_sam_f = tbls + 'aedes-aegypti-south-america.csv'
 aa_all_f = tbls + 'aedes-albopictus-all.csv'
-aa_car_f = tbls + 'aedes-albopictus-caribbean.csv'
-aa_cam_f = tbls + 'aedes-albopictus-central-america.csv'
-aa_sam_f = tbls + 'aedes-albopictus-south-america.csv'
+#aa_car_f = tbls + 'aedes-albopictus-caribbean.csv'
+#aa_cam_f = tbls + 'aedes-albopictus-central-america.csv'
+#aa_sam_f = tbls + 'aedes-albopictus-south-america.csv'
 bg_all_f = tbls + 'background-all.csv'
-bg_car_f = tbls + 'background-caribbean.csv'
-bg_cam_f = tbls + 'background-central-america.csv'
-bg_sam_f = tbls + 'background-south-america.csv'
+#bg_car_f = tbls + 'background-caribbean.csv'
+#bg_cam_f = tbls + 'background-central-america.csv'
+#bg_sam_f = tbls + 'background-south-america.csv'
 
 # read the data into memory
 ae_all = pd.read_csv(ae_all_f)
-ae_car = pd.read_csv(ae_car_f)
-ae_cam = pd.read_csv(ae_cam_f)
-ae_sam = pd.read_csv(ae_sam_f)
+#ae_car = pd.read_csv(ae_car_f)
+#ae_cam = pd.read_csv(ae_cam_f)
+#ae_sam = pd.read_csv(ae_sam_f)
 aa_all = pd.read_csv(aa_all_f)
-aa_car = pd.read_csv(aa_car_f)
-aa_cam = pd.read_csv(aa_cam_f)
-aa_sam = pd.read_csv(aa_sam_f)
+#aa_car = pd.read_csv(aa_car_f)
+#aa_cam = pd.read_csv(aa_cam_f)
+#aa_sam = pd.read_csv(aa_sam_f)
 bg_all = pd.read_csv(bg_all_f)
-bg_car = pd.read_csv(bg_car_f)
-bg_cam = pd.read_csv(bg_cam_f)
-bg_sam = pd.read_csv(bg_sam_f)
+#bg_car = pd.read_csv(bg_car_f)
+#bg_cam = pd.read_csv(bg_cam_f)
+#bg_sam = pd.read_csv(bg_sam_f)
 
 # remove no-data values
-ae_all = ae_all[ae_all['SoilCover'] != 255]
-ae_car = ae_car[ae_car['SoilCover'] != 255]
-ae_cam = ae_cam[ae_cam['SoilCover'] != 255]
-ae_sam = ae_sam[ae_sam['SoilCover'] != 255]
-aa_all = aa_all[aa_all['SoilCover'] != 255]
-aa_car = aa_car[aa_car['SoilCover'] != 255]
-aa_cam = aa_cam[aa_cam['SoilCover'] != 255]
-aa_sam = aa_sam[aa_sam['SoilCover'] != 255]
+ae_all = ae_all[ae_all['CLD_m'] != -9999]
+#ae_car = ae_car[ae_car['SoilCover'] != 255]
+#ae_cam = ae_cam[ae_cam['SoilCover'] != 255]
+#ae_sam = ae_sam[ae_sam['SoilCover'] != 255]
+aa_all = aa_all[aa_all['CLD_m'] != -9999]
+#aa_car = aa_car[aa_car['SoilCover'] != 255]
+#aa_cam = aa_cam[aa_cam['SoilCover'] != 255]
+#aa_sam = aa_sam[aa_sam['SoilCover'] != 255]
+bg_all = bg_all[bg_all['CLD_m'] != -9999]
 
 # set the fields
 fields = ae_all.columns[1:]
-labels = ['Soil cover', 'Vegetation cover', 'Impervious cover', 'Minimum temperature', 'Median temperature',
-    'Maximum temperature', 'Tree cover', 'Population density']
-units = ['%', '%', '%', 'C', 'C', 'C', '%', 'people per ha']
+
+#labels = ['Soil cover', 'Vegetation cover', 'Impervious cover', 'Minimum temperature', 'Median temperature',
+#    'Maximum temperature', 'Tree cover', 'Population density']
+
+labels = ['LAI','LAI','LAI','LAI','CLD','CLD','CLD','CLD','LST','LST','LST','LST','POP']
+units = [
+    'kurtosis', 'mean', 'skew', 'variance',
+    'kurtosis', 'mean', 'skew', 'variance',
+    'kurtosis', 'mean', 'skew', 'variance',
+    'people per ha']
+
+#units = ['%', '%', '%', 'C', 'C', 'C', '%', 'people per ha']
 group_labels = ['Background', 'Aedes aegypti', 'Aedes albopictus']
 bg_labels = ['all', 'Caribbean', 'Central America', 'South America']
-bg_arr = [bg_all, bg_car, bg_cam, bg_sam]
+#bg_arr = [bg_all, bg_car, bg_cam, bg_sam]
 
 # set plot locations for each plot label
 legend_loc = ['upper right', 'upper left', 'upper right', 'upper left', 'lower left', 'lower left',
@@ -78,7 +88,7 @@ for i in range(len(fields)):
         plot=plt, fill=True, label=group_labels_all, xlabel=xlabel, title=title, cutoff=2)
         
     # save the figure
-    plt.savefig("{}{}global-1km-{}.png".format(plts, 'by-extent/', fields[i]), dpi=200)
+    plt.savefig("{}{}all-1km-{}.png".format(plts, 'by-extent/', fields[i]), dpi=200)
     plt.close()
     
 

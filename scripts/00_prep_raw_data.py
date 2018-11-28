@@ -35,7 +35,8 @@ raster_lst = [
 raster_pop = 'LACR-pop-density-2015.tif' # data average resampled 
 
 # output projection
-proj = 'EPSG:54009'
+proj = 'EPSG:54009' # molleweide
+#proj = 'EPSG:54017' # behrman
 
 # output scales
 scales = [1000, 5000, 10000, 50000, 100000]
@@ -163,23 +164,24 @@ bnames = [
 
 for i in range(len(scales)):
     for j in range(len(bnames)):
-        outf = '{}{:06d}-m/{}.asc'.format(base, res[i], bnames[j])
+        outf = '{}{:06d}-m/{}.asc'.format(base, scales[i], bnames[j])
         cmd = 'gdal_translate -of {of} -b {b} {inf} {outf}'.format(
             of=of, b=j+1, inf=output_stacks[i], outf=outf)
         print(cmd)
+        ccb.run(cmd)
         
 
 #####
 # then, dumbly, do the log transform on the population data separately
 for i in range(len(scales)):
-    outf = '{}{:06d}-m/Population-ln.tif'.format(base, res[i])
+    outf = '{}{:06d}-m/Population-ln.tif'.format(base, scales[i])
     cmd = 'otbcli_BandMath -il {inf} -out "{outf}?&gdal:co:COMPRESS=LZW" -exp "exp(im1b13)"'.format(
         inf=output_stacks[i], outf=outf)
     print(cmd)
     ccb.run(cmd)
     
-    outf_ln = '{}{:06d}-m/Population-ln.asc'.format(base, res[i])
-    cmd = 'gdal_translate -of {of} {inf} {outf}'.format(
+    outf_ln = '{}{:06d}-m/Population-ln.asc'.format(base, scales[i])
+    cmd = 'gdal_translate -overwrite -of {of} {inf} {outf}'.format(
         of=of, inf=outf, outf=outf_ln)
     print(cmd)
     ccb.run(cmd)
