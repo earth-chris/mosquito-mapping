@@ -9,20 +9,10 @@ layers_dir = base + 'raster/'
 #layer = 'population-ln'
 #output_format = 'logistic'
 output_format = 'cumulative'
+features = ['hinge']
 
 layers = [
-    'LAI-kurtosis',
-    'LAI-mean',
-    'LAI-skew',
-    'LAI-variance',
-    'CLD-kurtosis',
-    'CLD-mean',
-    'CLD-skew',
-    'CLD-variance',
-    'LST-kurtosis',
-    'LST-mean',
-    'LST-skew',
-    'LST-variance'
+    'Nightlights-ln'
 ]
 
 # set the output resolutions
@@ -35,7 +25,8 @@ for i in range(len(res)):
     model_dir = '{dir}-{r:06d}-m/'.format(dir=out_dir, r=res[i])
     mx = ccb.maxent(samples=samples, env_layers=env_layers, model_dir=model_dir)
     mx.set_layers(layers)
-    mx.set_parameters(output_format=output_format, write_grids=True)
+    mx.set_parameters(output_format=output_format, write_grids=True, skip_if_exists=False,
+        features=features)
     
     # fit the model
     mx.fit()

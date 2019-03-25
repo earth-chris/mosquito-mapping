@@ -11,38 +11,183 @@ aa_pck = base + 'scripts/aa-auc.pck'
 aa = ccb.read.pck(aa_pck)
 ae = ccb.read.pck(ae_pck)
 
+# subset to mean and stdev for the cross validation
+aa_mn = aa.mean(axis=0)
+ae_mn = ae.mean(axis=0)
+aa_sd = aa.std(axis=0)
+ae_sd = ae.std(axis=0)
+
 # set the colors 
 #c_env = ["#56B4E9", "#009E73", "#CC79A7"]
-c_ext = ["#009E73", "#56B4E9", "#E69F00", "#CC79A7"]
+c_ext = ["#56B4E9", "#E69F00", "#009E73", "#CC79A7", '#F0E442', '#424243', '#ffffff']
 c_env = c_ext
+c_bar = ['#424243']
+
+# set vector-specific colors
+c_ae = '#CC79A7'
+c_aa = '#E69F00'
 
 # set the labels for each 
 #l_env = ['climate', 'land cover', 'all']
-l_env = ['lai', 'cloud cover', 'temperature', 'all']
+#env = ['cld', 'lst', 'luc', 'pop', 'envs']
+env = ['cld', 'lst', 'luc', 'pop', 'all']
+l_env = ['Cloud\ncover', 'Temperature', 'Land\ncover', 'Population\ndensity', 'all']
 l_ext = ['Full extent', 'Central America', 'Caribbean', 'South America']
 l_scl = ['1 km', '5 km', '10 km', '50 km', '100 km']
 n_scl = [1000, 5000, 10000, 50000, 100000]
 
+################################################
+# ERROR BARS
+
+# create the figure
+plt.figure(figsize=(4, 4), dpi=150)
+
+# do some stuff to index the boxplots backwards from how they're saved
+order = [3, 2, 1, 0]
+env_arr = np.array(l_env[:4])
+
+# set the plot
+inds = np.arange(4)
+plt.errorbar(inds, ae_mn[:, 0, 0][order], yerr=ae_sd[:, 0, 0][order], color=c_ae, 
+    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ aegypti}$')
+    
+#plt.errorbar(inds, aa_mn[:, 0, 0][order], yerr=aa_sd[:, 0, 0][order], color=c_aa, 
+#    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ albopictus}$')
+
+# set the labels
+ax = plt.axes()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.xticks(inds, env_arr[order])
+plt.ylim(0.5, 1.0)
+plt.xlim(-0.5, 3.5)
+plt.ylabel('Mean AUC')
+plt.title('$\it{Aedes\ aegypti}$')
+#plt.title('Drivers of habitat suitability')
+#plt.legend()
+plt.tight_layout()
+
+# save and close up
+plt.savefig(plots + 'aedes-aegypti-drivers.png', dpi=150)
+plt.close()
+
+#####
+# do it again for the albo
+
+# create the figure
+plt.figure(figsize=(4, 4), dpi=150)
+
+# do some stuff to index the boxplots backwards from how they're saved
+order = [3, 2, 1, 0]
+env_arr = np.array(l_env[:4])
+
+# set the plot
+inds = np.arange(4)
+plt.errorbar(inds, aa_mn[:, 0, 0][order], yerr=aa_sd[:, 0, 0][order], color=c_aa, 
+    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ albopictus}$')
+
+# set the labels
+ax = plt.axes()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.xticks(inds, env_arr[order])
+plt.ylim(0.5, 1.0)
+plt.xlim(-0.5, 3.5)
+plt.ylabel('Mean AUC')
+plt.title('$\it{Aedes\ albopictus}$')
+plt.tight_layout()
+
+# save and close up
+plt.savefig(plots + 'aedes-albopictus-drivers.png', dpi=150)
+plt.close()
+
+################################################
+# BOXPLOTS
+
+# do boxplots for each vector using the bootstraps
+# should be in rows: n_folds, cols: covariates
+aa_bx = aa[:4, :, 0, 0]
+ae_bx = ae[:4, :, 0, 0]
+
+# do some stuff to index the boxplots
+order = [3, 2, 1, 0]
+env_arr = np.array(l_env[:4])
+
+# create the figure
+plt.figure(figsize=(4, 4), dpi=150)
+
+# set some weird boxplots stuff
+bp = plt.boxplot(ae_bx[:, order], patch_artist=True)
+for element in ['boxes', 'whiskers', 'fliers', 'means', 'medians', 'caps']:
+    plt.setp(bp[element], color=c_bar[0])
+
+for i, patch in enumerate(bp['boxes']):
+    patch.set(facecolor=c_env[i])
+    
+# set the labels
+ax = plt.axes()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+xticks = plt.xticks()
+plt.xticks(xticks[0], env_arr[order])
+plt.ylim(0.5, 1.0)
+plt.ylabel('AUC')
+plt.title('Environmental drivers of suitability\n$\it{Aedes\ aegypti}$')
+
+# clean up and save
+plt.tight_layout()
+plt.savefig(plots + 'aedes-aegypti-drivers.png', dpi=150)
+plt.close()
+
+# create the figure for albopictus
+plt.figure(figsize=(4, 4), dpi=150)
+
+# set some weird boxplots stuff
+bp = plt.boxplot(aa_bx[:, order], patch_artist=True)
+for element in ['boxes', 'whiskers', 'fliers', 'means', 'medians', 'caps']:
+    plt.setp(bp[element], color=c_bar[0])
+
+for i, patch in enumerate(bp['boxes']):
+    patch.set(facecolor=c_env[i])
+    
+# set the labels
+ax = plt.axes()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+xticks = plt.xticks()
+plt.xticks(xticks[0], env_arr[order])
+plt.ylim(0.5, 1.0)
+plt.ylabel('AUC')
+plt.title('Environmental drivers of suitability\n$\it{Aedes\ albopictus}$')
+
+# clean up and save
+plt.tight_layout()
+plt.savefig(plots + 'aedes-albopictus-drivers.png', dpi=150)
+plt.close()
 
 # ok, plot out the data across all extents by environmental data used and by scale
 plt.figure(figsize=(4.5, 4.5), dpi=200)
 nbins = len(l_scl)
-width = 0.225
+width = 0.175
 space = 0.0
 ind1 = np.arange(nbins)
 ind2 = np.arange(nbins) + (width + space)
 ind3 = np.arange(nbins) + 2 * (width + space)
 ind4 = np.arange(nbins) + 3 * (width + space)
-inds = [ind1, ind2, ind3, ind4]
+ind5 = np.arange(nbins) + 4 * (width + space)
+ind6 = np.arange(nbins) + 5 * (width + space)
+inds = [ind1, ind2, ind3, ind4, ind5, ind6]
 
 # plot aegypti first
 for i in range(len(l_env)):
-    plt.bar(inds[i], ae[i, 0, :], width, color=c_env[i], label=l_env[i], edgecolor='#424243')
-    
+    plt.bar(inds[i], ae_mn[i, 0, :], width, color=c_env[i], label=l_env[i], edgecolor='#424243',
+        yerr=ae_sd[i, 0, :])
+    #plt.errorbar(inds[i], ae_mn[i, 0, :], yerr=ae_sd[i, 0, :], color=c_env[i], ecolor=c_bar, fmt='o')
+
 # set the labels and legend
 sp = 'Aedes aegypti'
 plt.ylim(0.5, 1)
-plt.xticks(ind2, l_scl, rotation='vertical')
+plt.xticks(ind2+(width/2), l_scl)
 plt.ylabel('AUC (mean)')
 plt.xlabel('Grain size')
 plt.title(sp, fontstyle='italic')
@@ -56,12 +201,13 @@ plt.close()
 # now for aedes albopictus
 plt.figure(figsize=(4.5, 4.5), dpi=200)
 for i in range(len(l_env)):
-    plt.bar(inds[i], aa[i, 0, :], width, color=c_env[i], label=l_env[i], edgecolor='#424243')
+    plt.bar(inds[i], aa_mn[i, 0, :], width, color=c_env[i], label=l_env[i], edgecolor='#424243',
+        yerr=aa_sd[i, 0, :])
     
 # set the labels and legend
 sp = 'Aedes albopictus'
 plt.ylim(0.5, 1)
-plt.xticks(ind2, l_scl, rotation='vertical')
+plt.xticks(ind2+(width/2), l_scl)
 plt.ylabel('AUC (mean)')
 plt.xlabel('Grain size')
 plt.title(sp, fontstyle='italic')
@@ -86,7 +232,8 @@ inds = [ind1, ind2, ind3, ind4]
 
 # plot aegypti first
 for i in range(len(l_ext)):
-    plt.bar(inds[i], ae[2, i, :], width, color=c_ext[i], label=l_ext[i], edgecolor='#424243')
+    plt.bar(inds[i], ae_mn[4, i, :], width, color=c_ext[i], label=l_ext[i], edgecolor='#424243',
+        yerr=ae_sd[4, i, :])
     
 # set the labels and legend
 sp = 'Aedes aegypti'
@@ -99,13 +246,14 @@ plt.legend(ncol=1, loc='upper right')
 plt.tight_layout()
 
 # save 'er up
-plt.savefig(plots + 'Extent variation - {}.png'.format(sp), dpi=300)
+plt.savefig(plots + 'Extent variation - {} - all.png'.format(sp), dpi=300)
 plt.close()
 
 # albopictus next!
 plt.figure(figsize=(4.5, 4.5), dpi=200)
 for i in range(len(l_ext)):
-    plt.bar(inds[i], aa[2, i, :], width, color=c_ext[i], label=l_ext[i], edgecolor='#424243')
+    plt.bar(inds[i], aa_mn[4, i, :], width, color=c_ext[i], label=l_ext[i], edgecolor='#424243',
+        yerr=aa_sd[4, i, :])
     
 # set the labels and legend
 sp = 'Aedes albopictus'
@@ -118,7 +266,7 @@ plt.legend(ncol=1, loc='upper right')
 plt.tight_layout()
 
 # save 'er up
-plt.savefig(plots + 'Extent variation - {}.png'.format(sp), dpi=300)
+plt.savefig(plots + 'Extent variation - {} - all.png'.format(sp), dpi=300)
 plt.close()
 
 

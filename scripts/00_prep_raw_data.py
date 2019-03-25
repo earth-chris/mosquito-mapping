@@ -32,6 +32,8 @@ raster_lst = [
     'LACR-LST-variance.tif'
 ]
 
+raster_lc = scratch + 'LACR-LC-stack-aligned.tif'
+
 raster_pop = 'LACR-pop-density-2015.tif' # data average resampled 
 
 # output projection
@@ -92,6 +94,8 @@ for i in range(len(raster_cld)):
 to_mask = raster_lai_nd + raster_cld_path + raster_lst_path
 to_mask.append(raw + raster_pop)
 
+to_mask = [raster_lc]
+
 for f in to_mask:
     # set the output file name
     outf = '{}-masked.tif'.format(scratch + os.path.basename(f)[:-4])
@@ -141,8 +145,29 @@ for res in scales:
     cmd = 'gdalwarp -multi -co COMPRESS-LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
         srs=proj, res=res, inf=stack, outf=outf)
     print(cmd)
-    ccb.run(cmd)
+    #ccb.run(cmd)
     
+# do this again for land cover
+lc_masked = '/home/salo/src/mosquito-mapping/raster/scratch/LACR-LC-stack-aligned-masked-2b.tif'
+output_lc_stacks = []
+for res in scales:
+    outf = '{}{:06d}-m/lc-layers.tif'.format(base, res)
+    output_lc_stacks.append(outf)
+    cmd = 'gdalwarp -multi -co COMPRESS-LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
+        srs=proj, res=res, inf=lc_masked, outf=outf)
+    print(cmd)
+    #ccb.run(cmd)
+    
+# and again for night lights
+nl_masked = '/home/salo/src/mosquito-mapping/raster/scratch/LACR-nightlights-stack.tif'
+output_nl_stacks = []
+for res in scales:
+    outf = '{}{:06d}-m/nl-layers.tif'.format(base, res)
+    output_nl_stacks.append(outf)
+    cmd = 'gdalwarp -multi -co COMPRESS-LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
+        srs=proj, res=res, inf=nl_masked, outf=outf)
+    print(cmd)
+    ccb.run(cmd)
 
 #####
 # now convert each layer to ascii grid for maxent
@@ -172,16 +197,43 @@ for i in range(len(scales)):
         
 
 #####
+# do this again for the first two bands of land cover (bare and tree cover)
+bnames = [
+    'LC-Bare',
+    'LC-Trees'
+]
+for i in range(len(scales)):
+    for j in range(len(bnames)):
+        outf = '{}{:06d}-m/{}.asc'.format(base, scales[i], bnames[j])
+        cmd = 'gdal_translate -of {of} -b {b} {inf} {outf}'.format(
+            of=of, b=j+1, inf=output_lc_stacks[i], outf=outf)
+        print(cmd)
+        ccb.run(cmd)
+        
+# and again for the nightlights
+bnames = [
+    'Nightlights',
+    'Nightlights-ln'
+]
+for i in range(len(scales)):
+    for j in range(len(bnames)):
+        outf = '{}{:06d}-m/{}.asc'.format(base, scales[i], bnames[j])
+        cmd = 'gdal_translate -of {of} -b {b} {inf} {outf}'.format(
+            of=of, b=j+1, inf=output_nl_stacks[i], outf=outf)
+        print(cmd)
+        ccb.run(cmd)
+    
+#####
 # then, dumbly, do the log transform on the population data separately
 for i in range(len(scales)):
     outf = '{}{:06d}-m/Population-ln.tif'.format(base, scales[i])
-    cmd = 'otbcli_BandMath -il {inf} -out "{outf}?&gdal:co:COMPRESS=LZW" -exp "exp(im1b13)"'.format(
+    cmd = 'otbcli_BandMath -il {inf} -out "{outf}?&gdal:co:COMPRESS=LZW" -exp "ln(im1b13)"'.format(
         inf=output_stacks[i], outf=outf)
     print(cmd)
-    ccb.run(cmd)
+    #ccb.run(cmd)
     
     outf_ln = '{}{:06d}-m/Population-ln.asc'.format(base, scales[i])
-    cmd = 'gdal_translate -overwrite -of {of} {inf} {outf}'.format(
+    cmd = 'gdal_translate -of {of} {inf} {outf}'.format(
         of=of, inf=outf, outf=outf_ln)
     print(cmd)
     ccb.run(cmd)
