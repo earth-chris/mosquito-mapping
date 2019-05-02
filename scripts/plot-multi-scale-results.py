@@ -50,6 +50,11 @@ env_arr = np.array(l_env[:4])
 inds = np.arange(4)
 plt.errorbar(inds, ae_mn[:, 0, 0][order], yerr=ae_sd[:, 0, 0][order], color=c_ae, 
     ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ aegypti}$')
+
+# loop through and annotate each point
+for i, item in enumerate(order):
+    plt.annotate(r'$\sigma={:0.3f}$'.format(ae_sd[:, 0, 0][item]), 
+        [inds[i]-0.4, ae_mn[:, 0, 0][item]-0.04])
     
 #plt.errorbar(inds, aa_mn[:, 0, 0][order], yerr=aa_sd[:, 0, 0][order], color=c_aa, 
 #    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ albopictus}$')
@@ -62,13 +67,14 @@ plt.xticks(inds, env_arr[order])
 plt.ylim(0.5, 1.0)
 plt.xlim(-0.5, 3.5)
 plt.ylabel('Mean AUC')
-plt.title('$\it{Aedes\ aegypti}$')
+plt.title('A)  $\it{Aedes\ aegypti}$')
 #plt.title('Drivers of habitat suitability')
 #plt.legend()
 plt.tight_layout()
 
 # save and close up
 plt.savefig(plots + 'aedes-aegypti-drivers.png', dpi=150)
+plt.savefig(plots + 'aedes-aegypti-drivers.svg')
 plt.close()
 
 #####
@@ -85,6 +91,11 @@ env_arr = np.array(l_env[:4])
 inds = np.arange(4)
 plt.errorbar(inds, aa_mn[:, 0, 0][order], yerr=aa_sd[:, 0, 0][order], color=c_aa, 
     ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ albopictus}$')
+    
+# loop through and annotate each point
+for i, item in enumerate(order):
+    plt.annotate(r'$\sigma={:0.3f}$'.format(aa_sd[:, 0, 0][item]), 
+        [inds[i]-0.4, aa_mn[:, 0, 0][item]-0.04])
 
 # set the labels
 ax = plt.axes()
@@ -94,11 +105,12 @@ plt.xticks(inds, env_arr[order])
 plt.ylim(0.5, 1.0)
 plt.xlim(-0.5, 3.5)
 plt.ylabel('Mean AUC')
-plt.title('$\it{Aedes\ albopictus}$')
+plt.title('B)  $\it{Aedes\ albopictus}$')
 plt.tight_layout()
 
 # save and close up
 plt.savefig(plots + 'aedes-albopictus-drivers.png', dpi=150)
+plt.savefig(plots + 'aedes-albopictus-drivers.svg')
 plt.close()
 
 ################################################

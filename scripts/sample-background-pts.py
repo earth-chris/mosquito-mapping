@@ -12,8 +12,10 @@ base = '/home/salo/src/mosquito-mapping/'
 plots = base + 'plots/'
 rpath = base + 'raster/001000-m/'
 bias_file = base + '/maxent-outputs/bias-file-001000-m/Culicidae.asc'
-ae_file = base + 'vector/aegypti-54009-3.shp'
-aa_file = base + 'vector/albopictus-54009-3.shp'
+#ae_file = base + 'vector/aegypti-54009-3.shp'
+#aa_file = base + 'vector/albopictus-54009-3.shp'
+ae_file = base + 'vector/aedes-aegypti-resampled-extract.shp'
+aa_file = base + 'vector/aedes-albopictus-resampled-extract.shp'
 
 # set the font size
 mpl.rcParams.update({'font.size': 20})
@@ -133,8 +135,8 @@ for field, raster, xlabel in zip(fields, rasters, xlabels):
     elif 'POP' in field:
         col = c_pop
         # and log transform the extracted data
-        cov_ae = np.log(cov_ae)
-        cov_aa = np.log(cov_aa)
+        #cov_ae = np.log(cov_ae)
+        #cov_aa = np.log(cov_aa)
         
     # infinity check
     if np.isinf(cov_ae).any():
@@ -175,7 +177,8 @@ for field, raster, xlabel in zip(fields, rasters, xlabels):
     
     # clean up and save the dang fig
     plt.tight_layout()
-    plt.savefig(plots + 'density_dist/aedes-aegypti-' + field + '.png', dpi=150)
+    plt.savefig(plots + 'density_dist/png/aedes-aegypti-' + field + '.png', dpi=150)
+    plt.savefig(plots + 'density_dist/svg/aedes-aegypti-' + field + '.svg')
     plt.close()
     
     
@@ -212,5 +215,6 @@ for field, raster, xlabel in zip(fields, rasters, xlabels):
     
     # clean up and save the dang fig
     plt.tight_layout()
-    plt.savefig(plots + 'density_dist/aedes-albopictus-' + field + '.png', dpi=150)
+    plt.savefig(plots + 'density_dist/png/aedes-albopictus-' + field + '.png', dpi=150)
+    plt.savefig(plots + 'density_dist/svg/aedes-albopictus-' + field + '.svg')
     plt.close()

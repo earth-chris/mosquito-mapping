@@ -10,15 +10,16 @@ exts = ['cam', 'car', 'sam']
 
 
 # set up the k-fold cross validation parameters
-n_splits = 5
+n_splits = 4
 shuffle = True # shuffles the order of the input data
 random_state = 1985 # the seed
-kf = model_selection.KFold(n_splits=n_splits, shuffle=True, random_state=1985)
+kf = model_selection.KFold(n_splits=n_splits, shuffle=shuffle, random_state=random_state)
 
 # split the global data first
 for vec in vecs:
     # read the input data
-    pts = pd.read_csv(base + vec + '-all.csv')
+    #pts = pd.read_csv(base + vec + '-all.csv')
+    pts = pd.read_csv(base + vec + '-resampled.csv')
     
     # set the counter for writing train/test subsets
     i = 1

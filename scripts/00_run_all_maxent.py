@@ -12,7 +12,7 @@ outdir = base + 'maxent-outputs/'
 output_format = 'cumulative'
 features = ['hinge'] #['auto']
 beta_multiplier = 1.5
-n_folds = 5
+n_folds = 4
 
 # set the species to assess
 spl = ['Aedes aegypti', 'Aedes albopictus']
@@ -22,7 +22,8 @@ sp = ['aedes-aegypti', 'aedes-albopictus']
 res = [1000, 5000, 10000, 50000, 100000]
 
 # set the sample geography data
-geo = ['all', 'cam', 'car', 'sam']
+#geo = ['all', 'cam', 'car', 'sam']
+geo = ['all']
 
 # set the environmental subsets
 #env = ['clim', 'lcov', 'envs']
@@ -33,21 +34,21 @@ geo = ['all', 'cam', 'car', 'sam']
 env = ['cld', 'lst', 'luc', 'pop', 'all']
 
 luclist = [
-    'LC-Bare',
+    #'LC-Bare',
     'LC-Trees',
     'LAI-mean',
     'LAI-variance'
 ]    
 
 cldlist = [
-    'CLD-kurtosis',
+    #'CLD-kurtosis',
     'CLD-mean',
     'CLD-skew',
     'CLD-variance'
 ]
 
 lstlist = [
-    'LST-kurtosis',
+    #'LST-kurtosis',
     'LST-mean',
     'LST-skew',
     'LST-variance'
@@ -88,8 +89,8 @@ for s in range(len(sp)):
                     mx = ccb.maxent()
                     
                     # set the output directory
-                    model_dir = '{outdir}{env}-{res:06d}-{geo}'.format(
-                        outdir=outdir, env=env[e], res=res[r], geo=geo[g])
+                    model_dir = '{outdir}{env}-{res:06d}-{geo}-{fold}'.format(
+                        outdir=outdir, env=env[e], res=res[r], geo=geo[g], fold=f+1)
                         
                     # set the input sample path
                     samples = '{samples}{sp}-{geo}-training-{fold}.csv'.format(
@@ -125,10 +126,10 @@ for s in range(len(sp)):
                         bias=bias, res=res[r])
                         
                     # set a flag to output the maps when using all variables
-                    if env[e] == 'envs':
+                    if env[e] == 'all':
                         write_grids = True
-                    if res[r] == 1000:
-                        write_grids = True
+                    #if res[r] == 1000:
+                    #    write_grids = True
                     else:
                         write_grids = False
                         
@@ -136,7 +137,7 @@ for s in range(len(sp)):
                     mx.set_parameters(model_dir=model_dir, samples=samples, env_layers=env_layers,
                         bias_file=bias_file, write_grids=write_grids, nodata=nodata,
                         output_format=output_format, features=features, verbose=False,
-                        skip_if_exists=True, beta_multiplier=beta_multiplier)
+                        skip_if_exists=False, beta_multiplier=beta_multiplier)
                         
                     # set the layers
                     mx.set_layers(layer_list)
@@ -176,7 +177,7 @@ for s in range(len(sp)):
                         
                         # loop through some number of times, randomly sample the background,
                         #  and calculate auc scores
-                        n_rndm = 10
+                        n_rndm = 5
                         auc = np.zeros(n_rndm)
                         fsc = np.zeros(n_rndm)
                         for i in range(n_rndm):
@@ -212,3 +213,48 @@ with open(pck_aef, 'wb') as f:
     
 with open(pck_aaf, 'wb') as f:
     pickle.dump(fsc_aa_mn, f)
+    
+
+# and run two final models with all data included
+for s in range(len(sp)):
+    # create a fresh maxent object
+    mx = ccb.maxent()
+    
+    # set the output directory
+    model_dir = '{outdir}{env}-{res:06d}-{geo}'.format(
+        outdir=outdir, env='all', res=res[0], geo='all')
+        
+    # set the input sample path
+    samples = '{samples}{sp}-resampled.csv'.format(
+        samples=samples_dir, sp=sp[s])
+        
+    # set the environmental layers directory
+    env_layers = '{layers}{res:06d}-m/'.format(
+        layers=layers, res=res[0])
+        
+    layer_list = all
+        
+    # set the bias file path
+    bias_file = '{bias}bias-file-{res:06d}-m/Culicidae.asc'.format(
+        bias=bias, res=res[0])
+        
+    # output the maps
+    write_grids = True
+    
+    # set the cross validation
+    replicate_type = 'crossvalidate'
+        
+    # set the parameters in the maxent object
+    mx.set_parameters(model_dir=model_dir, samples=samples, env_layers=env_layers,
+        bias_file=bias_file, write_grids=write_grids, nodata=nodata,
+        output_format=output_format, features=features, verbose=False,
+        skip_if_exists=False, beta_multiplier=beta_multiplier,
+        n_replicates=n_folds, replicate_type=replicate_type)
+        
+    # set the layers
+    mx.set_layers(layer_list)
+        
+    # print out the command to run
+    ccb.prnt.status(mx.build_cmd())
+    mx.fit()
+    
