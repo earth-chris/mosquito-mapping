@@ -32,6 +32,12 @@ raster_lst = [
     'LACR-LST-variance.tif'
 ]
 
+raster_pcp = [
+    '',
+    '',
+    ''
+]
+
 raster_lc = scratch + 'LACR-LC-stack-aligned.tif'
 
 raster_pop = 'LACR-pop-density-2015.tif' # data average resampled 
@@ -142,7 +148,7 @@ output_stacks = []
 for res in scales:
     outf = '{}{:06d}-m/stacked-layers.tif'.format(base, res)
     output_stacks.append(outf)
-    cmd = 'gdalwarp -multi -co COMPRESS-LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
+    cmd = 'gdalwarp -multi -co COMPRESS=LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
         srs=proj, res=res, inf=stack, outf=outf)
     print(cmd)
     #ccb.run(cmd)
@@ -153,7 +159,7 @@ output_lc_stacks = []
 for res in scales:
     outf = '{}{:06d}-m/lc-layers.tif'.format(base, res)
     output_lc_stacks.append(outf)
-    cmd = 'gdalwarp -multi -co COMPRESS-LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
+    cmd = 'gdalwarp -multi -co COMPRESS=LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
         srs=proj, res=res, inf=lc_masked, outf=outf)
     print(cmd)
     #ccb.run(cmd)
@@ -164,8 +170,19 @@ output_nl_stacks = []
 for res in scales:
     outf = '{}{:06d}-m/nl-layers.tif'.format(base, res)
     output_nl_stacks.append(outf)
-    cmd = 'gdalwarp -multi -co COMPRESS-LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
+    cmd = 'gdalwarp -multi -co COMPRESS=LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
         srs=proj, res=res, inf=nl_masked, outf=outf)
+    print(cmd)
+    ccb.run(cmd)
+
+# and for precip    
+precip_file = scratch + 'precipitation-stack-masked.tif'
+output_pcp_stacks = []
+for res in scales:
+    outf = '{}{:06d}-m/precip-layers.tif'.format(base, res)
+    output_pcp_stacks.append(outf)
+    cmd = 'gdalwarp -multi -overwrite -co COMPRESS=LZW -r bilinear -t_srs {srs} -tr {res} {res} {inf} {outf}'.format(
+        srs=proj, res=res, inf=precip_file, outf=outf)
     print(cmd)
     ccb.run(cmd)
 
@@ -220,6 +237,20 @@ for i in range(len(scales)):
         outf = '{}{:06d}-m/{}.asc'.format(base, scales[i], bnames[j])
         cmd = 'gdal_translate -of {of} -b {b} {inf} {outf}'.format(
             of=of, b=j+1, inf=output_nl_stacks[i], outf=outf)
+        print(cmd)
+        ccb.run(cmd)
+        
+# and again for precip
+bnames = [
+    'PCP-mean',
+    'PCP-variance',
+    'PCP-skew'
+]
+for i in range(len(scales)):
+    for j in range(len(bnames)):
+        outf = '{}{:06d}-m/{}.asc'.format(base, scales[i], bnames[j])
+        cmd = 'gdal_translate -of {of} -b {b} {inf} {outf}'.format(
+            of=of, b=j+1, inf=output_pcp_stacks[i], outf=outf)
         print(cmd)
         ccb.run(cmd)
     

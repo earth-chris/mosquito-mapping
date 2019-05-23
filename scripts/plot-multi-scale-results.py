@@ -19,7 +19,7 @@ ae_sd = ae.std(axis=0)
 
 # set the colors 
 #c_env = ["#56B4E9", "#009E73", "#CC79A7"]
-c_ext = ["#56B4E9", "#E69F00", "#009E73", "#CC79A7", '#F0E442', '#424243', '#ffffff']
+c_ext = ["#56B4E9", "#009E73", "#E69F00", "#CC79A7", '#F0E442', '#424243', '#ffffff']
 c_env = c_ext
 c_bar = ['#424243']
 
@@ -30,8 +30,9 @@ c_aa = '#E69F00'
 # set the labels for each 
 #l_env = ['climate', 'land cover', 'all']
 #env = ['cld', 'lst', 'luc', 'pop', 'envs']
-env = ['cld', 'lst', 'luc', 'pop', 'all']
-l_env = ['Cloud\ncover', 'Temperature', 'Land\ncover', 'Population\ndensity', 'all']
+env = ['pcp', 'luc', 'lst', 'pop', 'all']
+#l_env = ['Cloud\ncover', 'Temperature', 'Land\ncover', 'Population\ndensity', 'all']
+l_env = ['Precipitation', 'Land cover', 'Temperature', 'Population\ndensity', 'all']
 l_ext = ['Full extent', 'Central America', 'Caribbean', 'South America']
 l_scl = ['1 km', '5 km', '10 km', '50 km', '100 km']
 n_scl = [1000, 5000, 10000, 50000, 100000]
@@ -49,7 +50,8 @@ env_arr = np.array(l_env[:4])
 # set the plot
 inds = np.arange(4)
 plt.errorbar(inds, ae_mn[:, 0, 0][order], yerr=ae_sd[:, 0, 0][order], color=c_ae, 
-    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ aegypti}$')
+    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ aegypti}$', 
+    markeredgecolor='black', markeredgewidth=0.5)
 
 # loop through and annotate each point
 for i, item in enumerate(order):
@@ -63,10 +65,10 @@ for i, item in enumerate(order):
 ax = plt.axes()
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
-plt.xticks(inds, env_arr[order])
+plt.xticks(inds, env_arr[order], fontsize=8.5)
 plt.ylim(0.5, 1.0)
 plt.xlim(-0.5, 3.5)
-plt.ylabel('Mean AUC')
+plt.ylabel('AUC (mean)')
 plt.title('A)  $\it{Aedes\ aegypti}$')
 #plt.title('Drivers of habitat suitability')
 #plt.legend()
@@ -90,7 +92,8 @@ env_arr = np.array(l_env[:4])
 # set the plot
 inds = np.arange(4)
 plt.errorbar(inds, aa_mn[:, 0, 0][order], yerr=aa_sd[:, 0, 0][order], color=c_aa, 
-    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ albopictus}$')
+    ecolor=c_bar[0], fmt='o', markersize=10, label='$\it{Aedes\ albopictus}$',
+    markeredgecolor='black', markeredgewidth=0.5)
     
 # loop through and annotate each point
 for i, item in enumerate(order):
@@ -101,7 +104,7 @@ for i, item in enumerate(order):
 ax = plt.axes()
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
-plt.xticks(inds, env_arr[order])
+plt.xticks(inds, env_arr[order], fontsize=8.5)
 plt.ylim(0.5, 1.0)
 plt.xlim(-0.5, 3.5)
 plt.ylabel('Mean AUC')

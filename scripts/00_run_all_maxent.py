@@ -19,7 +19,8 @@ spl = ['Aedes aegypti', 'Aedes albopictus']
 sp = ['aedes-aegypti', 'aedes-albopictus']
 
 # set the resolutions to assess
-res = [1000, 5000, 10000, 50000, 100000]
+#res = [1000, 5000, 10000, 50000, 100000]
+res = [1000]
 
 # set the sample geography data
 #geo = ['all', 'cam', 'car', 'sam']
@@ -31,7 +32,8 @@ geo = ['all']
 #lcovlist = ['vegetation', 'trees', 'impervious', 'soil']
 #envslist = climlist + lcovlist
 
-env = ['cld', 'lst', 'luc', 'pop', 'all']
+#env = ['cld', 'lst', 'luc', 'pop', 'all']
+env = ['pcp', 'luc', 'lst', 'pop']
 
 luclist = [
     #'LC-Bare',
@@ -54,13 +56,21 @@ lstlist = [
     'LST-variance'
 ]
 
+pcplist = [
+    'PCP-mean',
+    'PCP-skew',
+    'PCP-variance'
+]
+
 poplist = ['Population-ln-nd']
 
 lucpoplist = luclist + poplist
 lstpoplist = lstlist + poplist
-all = cldlist + lstlist + luclist + poplist
+all = pcplist + luclist + lstlist + poplist
 
-envslist = [cldlist, lstlist, luclist, poplist, all]
+# set the groups to run
+#envslist = [cldlist, luclist, lstlist, poplist]
+envslist = [pcplist, luclist, lstlist, poplist]
 
 # set the maxent run options
 test_pct = 25
@@ -137,7 +147,7 @@ for s in range(len(sp)):
                     mx.set_parameters(model_dir=model_dir, samples=samples, env_layers=env_layers,
                         bias_file=bias_file, write_grids=write_grids, nodata=nodata,
                         output_format=output_format, features=features, verbose=False,
-                        skip_if_exists=False, beta_multiplier=beta_multiplier)
+                        skip_if_exists=True, beta_multiplier=beta_multiplier)
                         
                     # set the layers
                     mx.set_layers(layer_list)
