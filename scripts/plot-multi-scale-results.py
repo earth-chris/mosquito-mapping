@@ -1,5 +1,7 @@
 import ccb
 import glob
+from matplotlib import lines
+%matplotlib tk
 
 # set the base files to use
 base = '/home/salo/src/mosquito-mapping/'
@@ -36,6 +38,94 @@ l_env = ['Precipitation', 'Land cover', 'Temperature', 'Population\ndensity', 'a
 l_ext = ['Full extent', 'Central America', 'Caribbean', 'South America']
 l_scl = ['1 km', '5 km', '10 km', '50 km', '100 km']
 n_scl = [1000, 5000, 10000, 50000, 100000]
+
+# function to create legend proxies
+def create_proxy(color, marker, linestyle='none'):
+    line = lines.Line2D([0], [0], linestyle=linestyle, mfc=color,
+        mec='black', marker=marker)
+    return line
+
+################################################
+# JOINT PLOTTING
+plt.figure(figsize=(4, 4), dpi=150)
+
+# do some stuff to index the boxplots backwards from how they're saved
+order = [3, 2, 1, 0]
+order = [2, 0, 1, 3]
+env_arr = np.array(l_env[:4])
+
+# set the plot
+inds = np.arange(4)
+inds_ae = inds-0.15
+inds_aa = inds+0.15
+
+# do the boxplot
+aa_bx = aa[:4, :, 0, 0]
+ae_bx = ae[:4, :, 0, 0]
+width=0.25
+
+# ae first
+bp = plt.boxplot(ae_bx[:, order], patch_artist=True, 
+    positions=inds_ae, widths=width)
+for element in ['whiskers', 'fliers', 'means', 'medians', 'caps']:
+    plt.setp(bp[element], color=c_bar[0], alpha=0.8)
+    
+for element in ['boxes']:
+    plt.setp(bp[element], color=c_ae)
+
+for i, patch in enumerate(bp['boxes']):
+    patch.set(facecolor=c_ae)
+    
+# aa next
+bp = plt.boxplot(aa_bx[:, order], patch_artist=True, positions=inds_aa, 
+    widths=width)
+for element in ['whiskers', 'fliers', 'means', 'medians', 'caps']:
+    plt.setp(bp[element], color=c_bar[0], alpha=0.8)
+
+for element in ['boxes']:
+    plt.setp(bp[element], color=c_aa)
+
+for i, patch in enumerate(bp['boxes']):
+    patch.set(facecolor=c_aa)
+
+
+# set the labels
+ax = plt.axes()
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+plt.xticks(inds, env_arr[order], fontsize=8.5)
+plt.xlim(-0.75, 3.75)
+plt.ylabel('AUC (mean)')
+plt.title('Drivers of habitat suitability')
+
+# set ticks and labels
+ylim = [0.5, 1.0]
+#ylim = [0.725, 0.875]
+#step = 0.025
+#yticks = np.round((np.arange(ylim[0], ylim[1], step)), 3)
+#ytick_s = ['{:0.3f}'.format(ytick) for ytick in yticks]
+#plt.yticks(yticks, ytick_s)
+plt.ylim(ylim)
+
+xlabels = ax.set_xticklabels(env_arr[order])
+for i, xlabel in enumerate(xlabels):
+    xlabel.set_y(xlabel.get_position()[1] - (i % 2) * 0.045)
+
+# set the legend
+legend_labels = ['$\it{Aedes\ aegypti}$', '$\it{Aedes\ albopictus}$']
+legend_colors = [c_ae, c_aa]
+legend_markers = ['s', 's']
+proxies = []
+for i in range(len(legend_labels)):
+    proxies.append(create_proxy(legend_colors[i], legend_markers[i]))
+plt.legend(proxies, legend_labels, loc='upper right', fontsize=8.5)
+plt.tight_layout()
+
+# save and close up
+plt.savefig(plots + 'figure-2.png', dpi=600)
+plt.savefig(plots + 'figure-2.svg')
+plt.close()
+
 
 ################################################
 # ERROR BARS
@@ -115,6 +205,7 @@ plt.tight_layout()
 plt.savefig(plots + 'aedes-albopictus-drivers.png', dpi=150)
 plt.savefig(plots + 'aedes-albopictus-drivers.svg')
 plt.close()
+
 
 ################################################
 # BOXPLOTS

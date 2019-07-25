@@ -228,43 +228,45 @@ with open(pck_aaf, 'wb') as f:
 # and run two final models with all data included
 for s in range(len(sp)):
     # create a fresh maxent object
-    mx = ccb.maxent()
+mx = ccb.maxent()
+
+# set the output directory
+#model_dir = '{outdir}{env}-{res:06d}-{geo}'.format(
+#    outdir=outdir, env='all', res=res[0], geo='all')
     
-    # set the output directory
-    model_dir = '{outdir}{env}-{res:06d}-{geo}'.format(
-        outdir=outdir, env='all', res=res[0], geo='all')
-        
-    # set the input sample path
-    samples = '{samples}{sp}-resampled.csv'.format(
-        samples=samples_dir, sp=sp[s])
-        
-    # set the environmental layers directory
-    env_layers = '{layers}{res:06d}-m/'.format(
-        layers=layers, res=res[0])
-        
-    layer_list = all
-        
-    # set the bias file path
-    bias_file = '{bias}bias-file-{res:06d}-m/Culicidae.asc'.format(
-        bias=bias, res=res[0])
-        
-    # output the maps
-    write_grids = True
+model_dir = '/salo/natcap/maxent-outputs/'    
     
-    # set the cross validation
-    replicate_type = 'crossvalidate'
-        
-    # set the parameters in the maxent object
-    mx.set_parameters(model_dir=model_dir, samples=samples, env_layers=env_layers,
-        bias_file=bias_file, write_grids=write_grids, nodata=nodata,
-        output_format=output_format, features=features, verbose=False,
-        skip_if_exists=False, beta_multiplier=beta_multiplier,
-        n_replicates=n_folds, replicate_type=replicate_type)
-        
-    # set the layers
-    mx.set_layers(layer_list)
+# set the input sample path
+samples = '{samples}{sp}-resampled.csv'.format(
+    samples=samples_dir, sp=sp[s])
+    
+# set the environmental layers directory
+env_layers = '{layers}{res:06d}-m/'.format(
+    layers=layers, res=res[0])
+    
+layer_list = all
+    
+# set the bias file path
+bias_file = '{bias}bias-file-{res:06d}-m/Culicidae.asc'.format(
+    bias=bias, res=res[0])
+    
+# output the maps
+write_grids = True
+
+# set the cross validation
+replicate_type = 'crossvalidate'
+    
+# set the parameters in the maxent object
+mx.set_parameters(model_dir=model_dir, samples=samples, env_layers=env_layers,
+    bias_file=bias_file, write_grids=write_grids, nodata=nodata,
+    output_format=output_format, features=features, verbose=False,
+    skip_if_exists=False, beta_multiplier=beta_multiplier,
+    n_replicates=n_folds, replicate_type=replicate_type)
+    
+# set the layers
+mx.set_layers(layer_list)
         
     # print out the command to run
-    ccb.prnt.status(mx.build_cmd())
-    mx.fit()
+ccb.prnt.status(mx.build_cmd())
+mx.fit()
     

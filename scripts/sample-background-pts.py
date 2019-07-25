@@ -22,10 +22,11 @@ bck_file = base + 'scripts/background_data.pck'
 
 # set the font size
 mpl.rcParams.update({'font.size': 20})
-fs_xlabel = 25
+fs_xlabel = 22
 
 # set the colors
 c_cld = "#56B4E9" 
+c_pcp = "#56B4E9" 
 c_lst = "#E69F00"
 c_lc = "#009E73" 
 c_pop = "#CC79A7"
@@ -46,10 +47,10 @@ np.random.seed(1985)
 
 # read the bias file into memory
 no_data = -9999
-bias_ref = ccb.read.raster(bias_file)
-bias_ref.read_all()
-gd = bias_ref.data != no_data
-bias = bias_ref.data[gd]
+#bias_ref = ccb.read.raster(bias_file)
+#bias_ref.read_all()
+#gd = bias_ref.data != no_data
+#bias = bias_ref.data[gd]
 
 # clear memory
 bias_ref.data = None
@@ -76,10 +77,9 @@ with open(bck_file, 'rb') as f:
     bck_data = pickle.load(f)
 
 # set the corresponding vector fields with the raster data to read
-"""
 fields = ['LAI_k', 'LAI_m', 'LAI_s', 'LAI_v', 'LC-bare', 'LC-trees',
           'CLD_k', 'CLD_m', 'CLD_s', 'CLD_v', 'LST_k',
-          'LST_m', 'LST_s', 'LST_v', 'POP']
+          'LST_m', 'LST_s', 'LST_v', 'POP', 'PCP_m', 'PCP_v', 'PCP_s']
 
 rasters = ['LAI-kurtosis.asc',
            'LAI-mean.asc',
@@ -114,10 +114,10 @@ xlabels = ['leaf area index\nkurtosis',
            'temperature\nmean',
            'temperature\nskew',
            'temperature\nvariance',
-           'population density\npeople/ha',
+           'population\ndensity',
            'precipitation\nmean',
-           'precipitation\nskew',
-           'precipitation\nvariance']
+           'precipitation\nvariance',
+           'precipitation\nskew']
 """           
 fields = ['PCP_m', 'PCP_v', 'PCP_s']
 
@@ -128,13 +128,21 @@ rasters = ['PCP-mean.asc',
 xlabels = ['precipitation\nmean',
            'precipitation\nvariance',
            'precipitation\nskew']
+"""
+
+units = {
+    'lai': "\n($m^2\ m^{-2}$)",
+    'lc': "\n($\%$)",
+    'lst': "\n($C$)",
+    'pcp': "\n($mm\ mo^{-1}$)",
+    'pop': "\n($people\ ha^{-1}$)"
+}
            
 # create a list to store the min/max x/y values for plotting later
 xlims = list()
 ylims = list()
 
 # jk, use these ylim values that i calculated (using the above variables!)
-"""
 xlims = [[-4.008774429202085, 53.320801704764484],
         [-2.3001940460205077, 48.30407496643066],
         [-1.3720380291938783, 4.496097963809966],
@@ -180,11 +188,11 @@ xlims = [[3.2515556125640863, 220.4330385417938],
 ylims = [[-0.0006940201285573098, 0.014574422699703507],
         [-7.787104757443538e-06, 0.00016352919990631428],
         [-0.04355847010902551, 0.9147278722895357]]
-           
+"""
+
 # loop through each one and plot
 for field, raster, xlabel, xlim, ylim, background in \
-    zip(fields, rasters, xlabels, xlims, ylims, bck_pcp):
-#    zip(fields, rasters, xlabels, xlims, ylims, bck_data):
+    zip(fields, rasters, xlabels, xlims, ylims, bck_data):
 #for field, raster, xlabel in zip(fields, rasters, xlabels):
     
     # read the raster data
@@ -210,12 +218,20 @@ for field, raster, xlabel, xlim, ylim, background in \
     # get general metadata on colors
     if 'LAI' in field or 'LC' in field:
         col = c_lc
+        unit = units['lai']
+        if 'LC' in field:
+            unit = units['lc']
     elif 'CLD' in field:
         col = c_cld
+    elif 'PCP' in field:
+        col = c_pcp
+        unit = units['pcp']
     elif 'LST' in field:
         col = c_lst
+        unit = units['lst']
     elif 'POP' in field:
         col = c_pop
+        unit = units['pop']
         # and log transform the extracted data
         #cov_ae = np.log(cov_ae)
         #cov_aa = np.log(cov_aa)
@@ -241,7 +257,7 @@ for field, raster, xlabel, xlim, ylim, background in \
         
     # set legend and other plot parameters
     plt.title("")
-    plt.xlabel(xlabel, fontsize=fs_xlabel)
+    plt.xlabel(xlabel + unit, fontsize=fs_xlabel)
     ax = plt.axes()
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -260,6 +276,8 @@ for field, raster, xlabel, xlim, ylim, background in \
     # get the x and y limits to set for the next plot too
     #xlim_ae = plt.xlim()
     #ylim_ae = plt.ylim()
+    #plt.xlim(xlim_ae)
+    #plt.ylim(ylim_ae)
     
     # jk, use the ones calculated already
     plt.xlim(xlim)
@@ -293,7 +311,7 @@ for field, raster, xlabel, xlim, ylim, background in \
         
     # set legend and other plot parameters
     plt.title("")
-    plt.xlabel(xlabel, fontsize=fs_xlabel)
+    plt.xlabel(xlabel + unit, fontsize=fs_xlabel)
     ax = plt.axes()
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
@@ -310,12 +328,14 @@ for field, raster, xlabel, xlim, ylim, background in \
     ax.axes.get_yaxis().set_visible(False)
     
     # set the x and y limits to previous range
-    #xlim_aa = plt.xlim()
-    #ylim_aa = plt.ylim()
+    xlim_aa = plt.xlim()
+    ylim_aa = plt.ylim()
+    plt.xlim(xlim_aa)
+    plt.ylim(ylim_aa)
     
     # jk, use the ones calculated already
-    plt.xlim(xlim)
-    plt.ylim(ylim)
+    #plt.xlim(xlim)
+    #plt.ylim(ylim)
     
     # transform the x tick labels to normal numbers
     if 'POP' in field:
@@ -340,6 +360,43 @@ for field, raster, xlabel, xlim, ylim, background in \
     # store the min/max xlim and ylim data
     #xlims.append([np.min([xlim_ae[0], xlim_aa[0]]), np.max([xlim_ae[1], xlim_aa[1]])])
     #ylims.append([np.min([ylim_ae[0], ylim_aa[0]]), np.max([ylim_ae[1], ylim_aa[1]])])
+    
+    #####
+    # then do it again for both vectors
+    plt.figure(figsize=(4,4), dpi=150)
+    
+    # do the deed
+    aei.plot.density_dist([background, cov_ae, cov_aa], plot=plt, 
+        color=[c_bck, c_ae, c_aa], fill=False, linewidth=4)
+
+    # set legend and other plot parameters
+    plt.title("")
+    plt.xlabel(xlabel + unit, fontsize=fs_xlabel)
+    ax = plt.axes()
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    # turn off y axis ticks
+    ax.spines['left'].set_visible(False)
+    ax.axes.get_yaxis().set_visible(False)
+    
+    # set the x and y limits to previous range
+    xlim_aa = plt.xlim()
+    ylim_aa = plt.ylim()
+    plt.xlim(xlim_aa)
+    plt.ylim(ylim_aa)
+    
+    # transform the x tick labels to normal numbers
+    if 'POP' in field:
+        xt = [0.001, 0.1, 1, 10]
+        xl = np.log(xt)
+        plt.xticks(xl, xt)
+    
+    # clean up and save the dang fig
+    plt.tight_layout()
+    plt.savefig(plots + 'density_dist/png/both-' + field + '.png', dpi=150)
+    plt.savefig(plots + 'density_dist/svg/both-' + field + '.svg')
+    plt.close()
   
     
 # do some hacky stuff to run brunner munzel tests
